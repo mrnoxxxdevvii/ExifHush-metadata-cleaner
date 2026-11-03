@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0d1117">
+  <meta name="description" content="Remove EXIF, GPS, XMP and IPTC metadata from JPEG, PNG and WebP files in the browser. No uploads.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' blob: data:; style-src 'self'; script-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; manifest-src 'self'; worker-src 'none'">
+  <title>ExifHush - Remove photo metadata locally</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to the tool</a>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="./" aria-label="ExifHush home">
+        <img class="brand-mark" src="assets/logo-mark-white.png" width="46" height="34" alt="">
+        <img class="brand-word" src="assets/logo-wordmark-white.png" width="106" height="22" alt="ExifHush">
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a class="nav-link" href="#how-it-works">How it works</a>
+        <a class="nav-link nav-github" href="https://github.com/mrnoxxxdevvii" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+          GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero shell">
+      <h1>ExifHush - metadata cleaner open source GitHub tool.</h1>
+      <p class="lede">JPEG, PNG and WebP.</p>
+    </section>
+
+    <section class="workspace shell" id="workspace" aria-label="Metadata remover">
+      <div class="panel preview-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Your file</h2>
+          </div>
+          <span class="status" id="file-status">WAITING</span>
+        </div>
+
+        <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Drop an image here or choose a file">
+          <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden>
+          <svg class="dropzone-icon" viewBox="0 0 48 48" width="46" height="46" aria-hidden="true">
+            <path d="M24 32V9m0 0-8 8m8-8 8 8M8 31v5a5 5 0 0 0 5 5h22a5 5 0 0 0 5-5v-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/>
+          </svg>
+          <p class="dropzone-title">Drop a photo here</p>
+          <p class="dropzone-sub">or <span class="text-link">choose a file</span></p>
+          <p class="dropzone-meta">JPEG, PNG or WebP <span aria-hidden="true">·</span> 50 MB max</p>
+        </div>
+
+        <div class="preview" id="preview" hidden>
+          <div class="preview-frame">
+            <img id="preview-image" alt="Preview of the selected image">
+            <span class="preview-label">BEFORE</span>
+          </div>
+          <dl class="file-facts">
+            <div><dt>File</dt><dd id="file-name">—</dd></div>
+            <div><dt>Dimensions</dt><dd id="file-dimensions">—</dd></div>
+            <div><dt>Size</dt><dd id="file-size">—</dd></div>
+            <div><dt>Type</dt><dd id="file-type">—</dd></div>
+          </dl>
+          <button class="text-button" id="change-file" type="button">Choose another image</button>
+        </div>
+
+        <p class="fine-print">Files are read into memory. Closing or reloading the tab clears them.</p>
+      </div>
+
+      <div class="panel report-panel">
+        <div class="panel-head">
+          <div>
+            <h2 id="report-title">Metadata report</h2>
+          </div>
+          <span class="status" id="report-status">IDLE</span>
+        </div>
+
+        <p class="error-banner" id="error-banner" role="alert" hidden></p>
+
+        <div class="report-empty" id="report-empty">
+          <p>Load an image to inspect its metadata.</p>
+          <p class="report-empty-small">EXIF, GPS, XMP and IPTC fields are listed before removal.</p>
+        </div>
+
+        <div class="report-content" id="report-content" hidden>
+          <table class="meta-table">
+            <caption class="visually-hidden">Metadata found in the selected image</caption>
+            <tbody>
+              <tr><th scope="row">Location</th><td id="meta-location">—</td></tr>
+              <tr><th scope="row">Captured</th><td id="meta-date">—</td></tr>
+              <tr><th scope="row">Camera</th><td id="meta-camera">—</td></tr>
+              <tr><th scope="row">Lens</th><td id="meta-lens">—</td></tr>
+              <tr><th scope="row">Software</th><td id="meta-software">—</td></tr>
+              <tr><th scope="row">Author</th><td id="meta-author">—</td></tr>
+              <tr><th scope="row">XMP</th><td id="meta-xmp">—</td></tr>
+              <tr><th scope="row">IPTC</th><td id="meta-iptc">—</td></tr>
+            </tbody>
+          </table>
+
+          <div class="block-section">
+            <div class="block-head">
+              <h3>Metadata blocks</h3>
+              <span class="block-count" id="block-count">0 found</span>
+            </div>
+            <ul class="block-list" id="block-list"></ul>
+            <p class="block-note" id="block-note" hidden>No known metadata blocks found. Nothing to remove.</p>
+          </div>
+
+          <div class="action-row" id="action-row">
+            <button class="button button-primary" id="remove-button" type="button" disabled>
+              Remove metadata
+            </button>
+            <p class="action-note">Image data is not re-encoded.</p>
+          </div>
+
+          <div class="result" id="result" hidden>
+            <div class="result-head">
+              <div>
+                <h3>Clean file ready</h3>
+              </div>
+              <span class="status status-clean">CLEAN</span>
+            </div>
+            <div class="size-compare">
+              <div><span class="fact-label">Before</span><strong id="size-before">—</strong></div>
+              <span class="size-arrow" aria-hidden="true">→</span>
+              <div><span class="fact-label">After</span><strong id="size-after">—</strong></div>
+              <div><span class="fact-label">Removed</span><strong id="size-saved">—</strong></div>
+            </div>
+            <a class="button button-primary button-download" id="download-link" href="#" download>
+              Download clean image
+              <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M8 1v8.2l3.1-3.1 1.1 1.1L8 11.4 3.8 7.2l1.1-1.1L8 9.2V1h0ZM2 13h12v2H2v-2Z"/></svg>
+            </a>
+            <p class="result-note">The original file on disk is not modified.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell" id="how-it-works">
+      <h2>Processing steps</h2>
+      <ol class="steps">
+        <li>
+          <h3>Drop a file</h3>
+          <p>The file is read from disk with the File API. No upload request is made.</p>
+        </li>
+        <li>
+          <h3>Read the report</h3>
+          <p>Metadata fields are listed before removal. The original file is not modified.</p>
+        </li>
+        <li>
+          <h3>Remove and download</h3>
+          <p>Metadata blocks are removed at the container level. Image data is copied byte for byte.</p>
+        </li>
+        <li>
+          <h3>Star the repo</h3>
+          <p>Source: <a href="https://github.com/mrnoxxxdevvii/ExifHush-metadata-cleaner" target="_blank" rel="noopener noreferrer">ExifHush-metadata-cleaner</a> on GitHub. Leave a star if it was useful.</p>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <p class="footer-meta">MIT licensed</p>
+      <a class="footer-link" href="https://github.com/mrnoxxxdevvii" target="_blank" rel="noopener noreferrer">Built by Mr. Nox</a>
+    </div>
+  </footer>
+
+  <div class="visually-hidden" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="assets/vendor/exifr.umd.js" defer></script>
+  <script src="assets/app.js" defer></script>
+</body>
+</html>
